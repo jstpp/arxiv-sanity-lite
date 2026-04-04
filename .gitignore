@@ -13,3 +13,5 @@ venv
 volumes
 test.py
 trash
+static/images
+tmp
