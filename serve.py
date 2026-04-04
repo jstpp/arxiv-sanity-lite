@@ -31,7 +31,7 @@ from db.SQLLiteAlchemyInstance import SQLAlchemyInstance
 # -----------------------------------------------------------------------------
 # inits and globals
 
-RET_NUM = 25 # number of papers to return per page
+RET_NUM = 8 # number of papers to return per page
 
 app = Flask(__name__)
 
@@ -355,7 +355,8 @@ def main():
     context['gvars']['pid'] = opt_pid
     context['gvars']['time_filter'] = opt_time_filter
     context['gvars']['skip_have'] = opt_skip_have
-    context['gvars']['search_query'] = opt_q
+    #context['gvars']['search_query'] = opt_q
+    context['gvars']['search_query'] = request.form.get('q', '')
     context['gvars']['svm_c'] = str(C)
     context['gvars']['page_number'] = str(page_number)
 
@@ -756,4 +757,17 @@ def register_email():
             with get_email_db(flag='c') as edb:
                 edb[g.user] = email
 
-    return redirect(url_for('profile'))
+    return redirect(url_for('settings'))
+
+
+@app.route('/change_settings', methods=['POST'])
+def change_settings():
+    if 'focus-mode-toggle' in request.form:
+        if request.form['focus-mode-toggle'] == '1':
+            session['focus_mode'] = 1
+        else:
+            session['focus_mode'] = 0
+    else:
+        session['focus_mode'] = 0
+
+    return redirect(url_for('settings'))

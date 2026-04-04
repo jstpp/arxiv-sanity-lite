@@ -14,12 +14,5 @@ Sgmllib3k==1.0.0
 sqlitedict==2.1.0 
 threadpoolctl==3.5.0
 Werkzeug==3.1.3
-pymilvus==2.5.4
-tqdm==4.67.1
-psycopg2-binary==2.9.10
-Flask-SQLAlchemy==2.3.0
-SQLAlchemy==2.0.16
-torch
-requests
-bibtexparser
-
+pymilvus==2.6.11
+tqdm==4.67.1 

@@ -241,7 +241,6 @@ center {
     background: #ffffff;
     border-radius: 20px;
     padding: 20px;
-    margin-right: 20px;
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
@@ -253,6 +252,7 @@ center {
 
 .pdf-download {
     float: right;
+    margin-left: 10px;
     text-decoration: none;
     font-size: 16px;
     color: #6a7ff5;
@@ -262,6 +262,7 @@ center {
     flex: 1;
     display: flex;
     flex-direction: column;
+    margin-left: 20px;
 }
 
 .author-box,
