@@ -15,13 +15,14 @@ class PaperLocalSampling(Algorithm):
         MilvusInstance.connect_to_instance()
     
     def recommend(self, papers: List[Paper], recommend_count: int) -> List[Paper]:
-        if len(papers) == 0:
-            # Przy braku jakichkolwiek informacji zwracamy losowe publikacje
-            return RandomSampling(self.papers_db).recommend(papers, recommend_count=recommend_count)
-        
-        read_vectors = [paper.vector for paper in papers]
-        expected_vector = self.sample_from_multi_dim(read_vectors, sigma=0.1)
-        return [Paper.from_id(self.find_closest_paper(expected_vector, read_vectors), db=self.papers_db) for _ in range(recommend_count)]
+        return RandomSampling(self.papers_db).recommend(papers, recommend_count=recommend_count) #Temporary using random sampler. Needs to be fixed!
+        # if len(papers) == 0:
+        #     # Przy braku jakichkolwiek informacji zwracamy losowe publikacje
+        #     return RandomSampling(self.papers_db).recommend(papers, recommend_count=recommend_count)
+        # 
+        # read_vectors = [paper.vector for paper in papers]
+        # expected_vector = self.sample_from_multi_dim(read_vectors, sigma=0.1)
+        # return [Paper.from_id(self.find_closest_paper(expected_vector, read_vectors), db=self.papers_db) for _ in range(recommend_count)]
     
     def sample_from_one_dim(self, papers_one_dim: np.ndarray, sigma: float = 1.0) -> float:
         random_paper = np.random.choice(papers_one_dim)

@@ -10,9 +10,9 @@ class Paper:
         self.vector = vector
 
     @classmethod
-    def from_id(cls, arxiv_id: str, db: CompressedSqliteDict, vector):
+    def from_id(cls, arxiv_id: str, db: CompressedSqliteDict, vector = 0): # added default value - 0 - for vector variable
         paper_map = db[arxiv_id]
-        print(paper_map)
+        #print(paper_map)
         return Paper(arxiv_id=arxiv_id, title=paper_map['title'], authors=paper_map['authors'],
                      abstract=paper_map['summary'], vector=vector)
 
