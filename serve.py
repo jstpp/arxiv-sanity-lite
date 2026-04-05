@@ -376,6 +376,17 @@ def main():
         pids, scores = random_rank()
     elif opt_rank == 'chemical_formulas':
         pids, scores = chemical_formulas_rank(opt_smiles_input)
+    elif opt_rank == "chart":
+        iids, scores = image_rank(opt_q, opt_image_input)   # iids?
+        pids = iids                                         # temporary(?) bypass
+
+        # render all images to just the information we need for the UI
+        images = [render_iid(iid) for iid in iids]
+        for i, d in enumerate(images):
+            d["weight"] = float(scores[i])
+
+        context = default_context()
+        context["images"] = images
     else:
         raise ValueError("opt_rank %s is not a thing" % (opt_rank, ))
 
@@ -407,80 +418,24 @@ def main():
     pids = pids[start_index:end_index]
     scores = scores[start_index:end_index]
 
-    if opt_rank == "chart":
-        iids, scores = image_rank(opt_q, opt_image_input)
+    # render all papers to just the information we need for the UI
+    papers = [render_pid(pid) for pid in pids]
+    for i, p in enumerate(papers):
+        p["weight"] = float(scores[i])
 
-        # render all images to just the information we need for the UI
-        images = [render_iid(iid) for iid in iids]
-        for i, d in enumerate(images):
-            d["weight"] = float(scores[i])
+    # build the current tags for the user, and append the special 'all' tag
+    tags = get_tags()
+    rtags = [{"name": t, "n": len(pids)} for t, pids in tags.items()]
+    if rtags:
+        rtags.append({"name": "all"})
 
-        context = default_context()
-        context["images"] = images
-
-    else:
-        # rank papers: by tags, by time, by random
-        words = []  # only populated in the case of svm rank
-        if opt_rank == "search":
-            pids, scores = search_rank(q=opt_q)
-        elif opt_rank == "tags":
-            pids, scores, words = svm_rank(tags=opt_tags, C=C)
-        elif opt_rank == "pid":
-            pids, scores, words = svm_rank(pid=opt_pid, C=C)
-        elif opt_rank == "time":
-            pids, scores = time_rank()
-        elif opt_rank == "random":
-            pids, scores = random_rank()
-        elif opt_rank == "chemical_formulas":
-            pids, scores = chemical_formulas_rank(opt_smiles_input)
-        else:
-            raise ValueError("opt_rank %s is not a thing" % (opt_rank,))
-
-        # filter by time
-        if opt_time_filter:
-            mdb = get_metas()
-            kv = {
-                k: v for k, v in mdb.items()
-            }  # read all of metas to memory at once, for efficiency
-            tnow = time.time()
-            deltat = (
-                int(opt_time_filter) * 60 * 60 * 24
-            )  # allowed time delta in seconds
-            keep = [
-                i for i, pid in enumerate(pids) if (tnow - kv[pid]["_time"]) < deltat
-            ]
-            pids, scores = [pids[i] for i in keep], [scores[i] for i in keep]
-
-        # optionally hide papers we already have
-        if opt_skip_have == "yes":
-            tags = get_tags()
-            have = set().union(*tags.values())
-            keep = [i for i, pid in enumerate(pids) if pid not in have]
-            pids, scores = [pids[i] for i in keep], [scores[i] for i in keep]
-
-        start_index = (page_number - 1) * RET_NUM  # desired starting index
-        end_index = min(start_index + RET_NUM, len(pids))  # desired ending index
-        pids = pids[start_index:end_index]
-        scores = scores[start_index:end_index]
-
-        # render all papers to just the information we need for the UI
-        papers = [render_pid(pid) for pid in pids]
-        for i, p in enumerate(papers):
-            p["weight"] = float(scores[i])
-
-        # build the current tags for the user, and append the special 'all' tag
-        tags = get_tags()
-        rtags = [{"name": t, "n": len(pids)} for t, pids in tags.items()]
-        if rtags:
-            rtags.append({"name": "all"})
-
-        context = default_context()
-        context["papers"] = papers
-        context["words"] = words
-        context["tags"] = rtags
-        context["words_desc"] = (
-            "Here are the top 40 most positive and bottom 20 most negative weights of the SVM. If they don't look great then try tuning the regularization strength hyperparameter of the SVM, svm_c, above. Lower C is higher regularization."
-        )
+    context = default_context()
+    context["papers"] = papers
+    context["words"] = words
+    context["tags"] = rtags
+    context["words_desc"] = (
+        "Here are the top 40 most positive and bottom 20 most negative weights of the SVM. If they don't look great then try tuning the regularization strength hyperparameter of the SVM, svm_c, above. Lower C is higher regularization."
+    )
 
     # build the page context information and render
     context = default_context()
